@@ -89,7 +89,7 @@ export default function ReceptionPage() {
           >
             🔄
           </button>
-          <Link to="/admin" className="header-nav-btn">
+          <Link to="/admin-login" className="header-nav-btn">
             📊 Admin
           </Link>
         </div>

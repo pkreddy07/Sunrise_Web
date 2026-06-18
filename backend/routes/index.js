@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const bookingController = require('../controllers/bookingController');
 const ocrController = require('../controllers/ocrController');
+const authController = require('../controllers/authController');
 const path = require('path');
 const fs = require('fs');
 
@@ -17,6 +18,10 @@ router.post('/bookings/checkout', bookingController.checkoutBooking);
 // ─── OCR Routes ────────────────────────────────────────────
 router.post('/ocr/front', ocrController.processFront);
 router.post('/ocr/back', ocrController.processBack);
+
+// ─── Auth Routes ───────────────────────────────────────────
+router.post('/auth/send-otp', authController.sendOtp);
+router.post('/auth/verify-otp', authController.verifyOtp);
 
 // ─── Admin Routes ──────────────────────────────────────────
 router.get('/admin/analytics', bookingController.getAnalytics);

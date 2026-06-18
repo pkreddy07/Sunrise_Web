@@ -41,6 +41,17 @@ export async function getAllBookings() {
   return res.data;
 }
 
+// ─── Auth ─────────────────────────────────────────────────
+export async function sendOtp() {
+  const res = await api.post('/auth/send-otp');
+  return res.data;
+}
+
+export async function verifyOtp(otp) {
+  const res = await api.post('/auth/verify-otp', { otp });
+  return res.data;
+}
+
 // ─── Admin ────────────────────────────────────────────────
 export async function getAnalytics() {
   const res = await api.get('/admin/analytics');
