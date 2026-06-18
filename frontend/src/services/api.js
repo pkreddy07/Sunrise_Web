@@ -20,8 +20,8 @@ export async function processOcrFront(imageBase64) {
   return res.data;
 }
 
-export async function processOcrBack(imageBase64) {
-  const res = await api.post('/ocr/back', { image: imageBase64 });
+export async function processOcrBack(imageBase64, useOcr = false) {
+  const res = await api.post('/ocr/back', { image: imageBase64, useOcr });
   return res.data;
 }
 

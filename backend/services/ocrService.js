@@ -1,5 +1,7 @@
 // backend/services/ocrService.js
 const Tesseract = require('tesseract.js');
+const sharp = require('sharp');
+const jsQR = require('jsqr');
 
 async function extractTextFromImage(base64Image) {
   const imageBuffer = Buffer.from(base64Image, 'base64');
@@ -141,8 +143,74 @@ function calculateAge(dobString) {
   return age.toString();
 }
 
+/**
+ * Read QR code from image and parse Aadhaar XML data.
+ * Returns null if no QR code found or parsing fails.
+ */
+async function extractFromQR(base64Image) {
+  try {
+    const imageBuffer = Buffer.from(base64Image, 'base64');
+    const { data, info } = await sharp(imageBuffer)
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+
+    const code = jsQR(new Uint8ClampedArray(data), info.width, info.height);
+    if (!code || !code.data) return null;
+
+    return parseAadhaarQR(code.data);
+  } catch (err) {
+    console.error('QR read error:', err.message);
+    return null;
+  }
+}
+
+/**
+ * Parse the XML string embedded in the Aadhaar QR code.
+ * Handles both old (yob only) and new (dob field) QR formats.
+ */
+function parseAadhaarQR(qrData) {
+  const attr = (name) => {
+    const m = qrData.match(new RegExp(`\\b${name}="([^"]*)"`));
+    return m ? m[1].trim() : '';
+  };
+
+  const gRaw = attr('gender');
+  const gender = gRaw === 'M' ? 'Male' : gRaw === 'F' ? 'Female' : gRaw || '';
+
+  // Prefer explicit dob field; fall back to yob (year only → 01/01/YYYY)
+  let dob = attr('dob');
+  if (!dob) {
+    const yob = attr('yob');
+    if (yob) dob = `01/01/${yob}`;
+  }
+
+  const uid = attr('uid').replace(/\s/g, '');
+
+  const addressParts = [
+    attr('co'),
+    attr('house'),
+    attr('street'),
+    attr('lm'),
+    attr('loc'),
+    attr('vtc'),
+    attr('dist') ? `DIST: ${attr('dist')}` : '',
+    attr('state'),
+    attr('pc'),
+  ].filter(Boolean);
+
+  return {
+    fullName: attr('name'),
+    dob,
+    gender,
+    aadhaarNumber: uid,
+    address: addressParts.join(', '),
+  };
+}
+
 module.exports = {
   extractTextFromImage,
+  extractFromQR,
   parseFrontAadhaar,
   parseBackAadhaar,
   calculateAge,

@@ -40,11 +40,12 @@ async function processFront(req, res) {
 
 /**
  * POST /api/ocr/back
- * Process back side of Aadhaar
+ * Process back side of Aadhaar (address + QR code side).
+ * Tries QR first unless the caller sets useOcr: true (user-requested OCR retry).
  */
 async function processBack(req, res) {
   try {
-    const { image } = req.body;
+    const { image, useOcr = false } = req.body;
 
     if (!image) {
       return res
@@ -54,15 +55,25 @@ async function processBack(req, res) {
 
     const base64 = image.replace(/^data:image\/\w+;base64,/, '');
 
+    // ── QR path ────────────────────────────────────────────
+    if (!useOcr) {
+      const qrData = await ocrService.extractFromQR(base64);
+      if (qrData && (qrData.fullName || qrData.address)) {
+        const age = ocrService.calculateAge(qrData.dob);
+        return res.json({
+          success: true,
+          data: { ...qrData, age, source: 'qr' },
+        });
+      }
+    }
+
+    // ── OCR fallback (or explicit retry) ───────────────────
     const rawText = await ocrService.extractTextFromImage(base64);
     const parsed = ocrService.parseBackAadhaar(rawText);
 
     return res.json({
       success: true,
-      data: {
-        ...parsed,
-        rawText,
-      },
+      data: { ...parsed, source: 'ocr', rawText },
     });
   } catch (error) {
     console.error('OCR back error:', error);

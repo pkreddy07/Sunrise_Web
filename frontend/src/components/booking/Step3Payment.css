@@ -53,22 +53,19 @@
 }
 
 .qr-frame {
-  width: 200px;
-  height: 200px;
-  border: 3px solid var(--gray-200);
-  border-radius: 14px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 240px;
+  padding: 12px;
+  border: 1px solid var(--gray-200);
+  border-radius: 16px;
   background: white;
-  box-shadow: var(--shadow);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
 
 .qr-frame img {
   width: 100%;
-  height: 100%;
-  object-fit: contain;
+  height: auto;
+  display: block;
+  border-radius: 10px;
 }
 
 .qr-placeholder {

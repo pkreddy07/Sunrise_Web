@@ -5,19 +5,56 @@ import { processOcrFront, processOcrBack } from '../../services/api';
 import './Step1Verification.css';
 
 export default function Step1Verification({ formData, onChange, onNext }) {
-  const [frontPreview, setFrontPreview] = useState(null);
-  const [backPreview, setBackPreview] = useState(null);
-  const [frontLoading, setFrontLoading] = useState(false);
-  const [backLoading, setBackLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [ocrStatus, setOcrStatus] = useState({ front: '', back: '' });
+  // ── QR method state ──────────────────────────────────────
+  const [qrPreview, setQrPreview]   = useState(null);
+  const [qrLoading, setQrLoading]   = useState(false);
+  const [qrStatus,  setQrStatus]    = useState(''); // '' | 'success' | 'error'
 
+  // ── Photos method state ──────────────────────────────────
+  const [frontPreview, setFrontPreview] = useState(null);
+  const [backPreview,  setBackPreview]  = useState(null);
+  const [frontLoading, setFrontLoading] = useState(false);
+  const [backLoading,  setBackLoading]  = useState(false);
+  const [photoStatus,  setPhotoStatus]  = useState({ front: '', back: '' });
+
+  const [error, setError] = useState('');
+
+  // ── QR handler — QR extraction only, no OCR fallback ────
+  async function handleQrCapture(imageDataUrl) {
+    setQrPreview(imageDataUrl);
+    if (!imageDataUrl) { setQrStatus(''); return; }
+
+    setQrLoading(true);
+    setError('');
+    try {
+      const result = await processOcrBack(imageDataUrl, false);
+      if (result.success && result.data.source === 'qr') {
+        const { fullName, dob, age, gender, aadhaarNumber, address } = result.data;
+        onChange({
+          ...formData,
+          fullName:      fullName      || formData.fullName,
+          dob:           dob           || formData.dob,
+          age:           age           || formData.age,
+          gender:        gender        || formData.gender,
+          aadhaarNumber: aadhaarNumber || formData.aadhaarNumber,
+          address:       address       || formData.address,
+        });
+        setQrStatus('success');
+      } else {
+        // QR not found in this image
+        setQrStatus('error');
+      }
+    } catch {
+      setQrStatus('error');
+    } finally {
+      setQrLoading(false);
+    }
+  }
+
+  // ── Front handler — OCR only ─────────────────────────────
   async function handleFrontCapture(imageDataUrl) {
     setFrontPreview(imageDataUrl);
-    if (!imageDataUrl) {
-      setOcrStatus((s) => ({ ...s, front: '' }));
-      return;
-    }
+    if (!imageDataUrl) { setPhotoStatus((s) => ({ ...s, front: '' })); return; }
 
     setFrontLoading(true);
     setError('');
@@ -27,41 +64,38 @@ export default function Step1Verification({ formData, onChange, onNext }) {
         const { fullName, dob, age, gender, aadhaarNumber } = result.data;
         onChange({
           ...formData,
-          fullName: fullName || formData.fullName,
-          dob: dob || formData.dob,
-          age: age || formData.age,
-          gender: gender || formData.gender,
+          fullName:      fullName      || formData.fullName,
+          dob:           dob           || formData.dob,
+          age:           age           || formData.age,
+          gender:        gender        || formData.gender,
           aadhaarNumber: aadhaarNumber || formData.aadhaarNumber,
         });
-        setOcrStatus((s) => ({ ...s, front: 'success' }));
+        setPhotoStatus((s) => ({ ...s, front: 'success' }));
       }
-    } catch (err) {
+    } catch {
       setError('OCR failed for front side. Please fill details manually.');
-      setOcrStatus((s) => ({ ...s, front: 'error' }));
+      setPhotoStatus((s) => ({ ...s, front: 'error' }));
     } finally {
       setFrontLoading(false);
     }
   }
 
+  // ── Back handler — OCR only (skip QR) ───────────────────
   async function handleBackCapture(imageDataUrl) {
     setBackPreview(imageDataUrl);
-    if (!imageDataUrl) {
-      setOcrStatus((s) => ({ ...s, back: '' }));
-      return;
-    }
+    if (!imageDataUrl) { setPhotoStatus((s) => ({ ...s, back: '' })); return; }
 
     setBackLoading(true);
     setError('');
     try {
-      const result = await processOcrBack(imageDataUrl);
+      const result = await processOcrBack(imageDataUrl, true); // useOcr: true
       if (result.success) {
-        const { address } = result.data;
-        onChange({ ...formData, address: address || formData.address });
-        setOcrStatus((s) => ({ ...s, back: 'success' }));
+        onChange({ ...formData, address: result.data.address || formData.address });
+        setPhotoStatus((s) => ({ ...s, back: 'success' }));
       }
-    } catch (err) {
+    } catch {
       setError('OCR failed for back side. Please enter address manually.');
-      setOcrStatus((s) => ({ ...s, back: 'error' }));
+      setPhotoStatus((s) => ({ ...s, back: 'error' }));
     } finally {
       setBackLoading(false);
     }
@@ -72,56 +106,104 @@ export default function Step1Verification({ formData, onChange, onNext }) {
   }
 
   function validate() {
-    if (!formData.fullName?.trim()) return 'Please enter customer name';
+    if (!formData.fullName?.trim())     return 'Please enter customer name';
     if (!formData.contactNumber?.trim()) return 'Please enter contact number';
-    if (!formData.checkIn?.trim()) return 'Please enter check-in date & time';
-    if (!formData.checkOut?.trim()) return 'Please enter check-out date & time';
+    if (!formData.checkIn?.trim())       return 'Please enter check-in date & time';
+    if (!formData.checkOut?.trim())      return 'Please enter check-out date & time';
     return null;
   }
 
   function handleNext() {
     const err = validate();
-    if (err) {
-      setError(err);
-      return;
-    }
+    if (err) { setError(err); return; }
     setError('');
     onNext();
   }
 
+  const anyPreview = qrPreview || backPreview;
+
   return (
     <div className="step1">
-      {/* Aadhaar Upload Section */}
+      {/* ── Aadhaar Upload ── */}
       <div className="aadhaar-section">
         <h3 className="section-title">📇 Aadhaar Card Upload</h3>
-        <p className="section-hint">Upload Aadhaar to auto-fill customer details</p>
+        <p className="section-hint">Choose a method to auto-fill customer details</p>
 
-        <div className="aadhaar-captures">
-          <ImageCapture
-            label="📄 Front Side of Aadhaar"
-            onCapture={handleFrontCapture}
-            preview={frontPreview}
-            loading={frontLoading}
-          />
-          {ocrStatus.front === 'success' && (
-            <div className="ocr-badge success">✅ Details extracted successfully</div>
-          )}
+        <div className="aadhaar-methods">
+          {/* ── Method 1: Scan QR ── */}
+          <div className="aadhaar-method">
+            <div className="method-header">
+              <span className="method-icon">📱</span>
+              <div>
+                <div className="method-title">Scan QR Code</div>
+                <div className="method-desc">Capture the QR on the address side — fills all fields instantly</div>
+              </div>
+            </div>
 
-          <ImageCapture
-            label="📄 Back Side of Aadhaar"
-            onCapture={handleBackCapture}
-            preview={backPreview}
-            loading={backLoading}
-          />
-          {ocrStatus.back === 'success' && (
-            <div className="ocr-badge success">✅ Address extracted successfully</div>
-          )}
+            <ImageCapture
+              label="Aadhaar Address Side (QR)"
+              onCapture={handleQrCapture}
+              preview={qrPreview}
+              loading={qrLoading}
+            />
+
+            {qrStatus === 'success' && (
+              <div className="ocr-badge success">✅ All details extracted from QR code</div>
+            )}
+            {qrStatus === 'error' && (
+              <div className="ocr-badge error">❌ QR not readable — try Front + Back Photos</div>
+            )}
+          </div>
+
+          {/* ── OR Divider ── */}
+          <div className="method-or-divider">
+            <div className="or-bar" />
+            <div className="or-circle">OR</div>
+            <div className="or-bar" />
+          </div>
+
+          {/* ── Method 2: Front + Back Photos ── */}
+          <div className="aadhaar-method">
+            <div className="method-header">
+              <span className="method-icon">📸</span>
+              <div>
+                <div className="method-title">Front + Back Photos</div>
+                <div className="method-desc">Upload both sides separately using OCR</div>
+              </div>
+            </div>
+
+            <ImageCapture
+              label="Front Side (Name & DOB)"
+              onCapture={handleFrontCapture}
+              preview={frontPreview}
+              loading={frontLoading}
+            />
+            {photoStatus.front === 'success' && (
+              <div className="ocr-badge success">✅ Name & details extracted</div>
+            )}
+            {photoStatus.front === 'error' && (
+              <div className="ocr-badge error">❌ Extraction failed — fill manually</div>
+            )}
+
+            <ImageCapture
+              label="Back Side (Address)"
+              onCapture={handleBackCapture}
+              preview={backPreview}
+              loading={backLoading}
+            />
+            {photoStatus.back === 'success' && (
+              <div className="ocr-badge success">✅ Address extracted</div>
+            )}
+            {photoStatus.back === 'error' && (
+              <div className="ocr-badge error">❌ Extraction failed — fill manually</div>
+            )}
+          </div>
         </div>
       </div>
 
       {error && <div className="alert alert-error">⚠️ {error}</div>}
 
-      {/* Customer Details Form */}
+      {/* ── Customer Details Form ── */}
       <div className="customer-details">
         <h3 className="section-title">👤 Customer Details</h3>
         <p className="section-hint">Auto-filled from Aadhaar. Edit if needed.</p>
@@ -205,11 +287,7 @@ export default function Step1Verification({ formData, onChange, onNext }) {
               rows={3}
               value={formData.address || ''}
               onChange={(e) => handleChange('address', e.target.value)}
-              placeholder={
-                backPreview
-                  ? 'Auto-filled from back side'
-                  : 'Enter address manually'
-              }
+              placeholder={anyPreview ? 'Auto-filled from Aadhaar' : 'Enter address manually'}
             />
           </div>
 

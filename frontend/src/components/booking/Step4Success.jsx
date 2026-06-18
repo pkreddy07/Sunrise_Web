@@ -1,10 +1,11 @@
 // frontend/src/components/booking/Step4Success.jsx
 import React from 'react';
+import { generateInvoice } from '../../utils/generateInvoice';
 import './Step4Success.css';
 
 export default function Step4Success({ bookingId, formData, onClose }) {
   function handleGenerateInvoice() {
-    alert('Invoice generation coming soon!');
+    generateInvoice(bookingId, formData);
   }
 
   return (
@@ -50,7 +51,7 @@ export default function Step4Success({ bookingId, formData, onClose }) {
           className="btn btn-outline btn-lg"
           onClick={handleGenerateInvoice}
         >
-          🧾 Generate Invoice
+          🧾 Download Invoice
         </button>
         <button className="btn btn-primary btn-lg" onClick={onClose}>
           🏠 Return To Home

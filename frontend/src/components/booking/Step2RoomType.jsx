@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import './Step2RoomType.css';
 
 const ROOM_TYPES = [
-  { name: 'Suite', price: 1500, icon: '🏛️', desc: 'Elegant & comfortable suite' },
-  { name: 'Deluxe', price: 1800, icon: '⭐', desc: 'Premium deluxe room' },
+  { name: 'Room only', price: 1500, icon: '🏛️', desc: 'Elegant & comfortable room' },
+  { name: 'Room + breakfast', price: 1800, icon: '🍽️', desc: 'Elegant & comfortable room, inclusive of breakfast' },
   { name: 'Luxury', price: 2000, icon: '👑', desc: 'Ultimate luxury experience' },
 ];
 
@@ -18,7 +18,7 @@ export default function Step2RoomType({ roomNumber, formData, onChange, onNext, 
 
   function handleNext() {
     if (!formData.roomType) {
-      setError('Please select a room type');
+      setError('Please select reservation type');
       return;
     }
     onNext();

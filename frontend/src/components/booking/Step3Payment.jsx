@@ -1,6 +1,5 @@
 // frontend/src/components/booking/Step3Payment.jsx
 import React, { useState } from 'react';
-import { getQrCodeUrl } from '../../services/api';
 import './Step3Payment.css';
 
 export default function Step3Payment({ formData, onChange, onNext, onBack, loading }) {
@@ -43,20 +42,9 @@ export default function Step3Payment({ formData, onChange, onNext, onBack, loadi
         <div className="qr-title">Scan to Pay via UPI</div>
         <div className="qr-frame">
           <img
-            src={getQrCodeUrl()}
+            src="/qr-code.jpeg"
             alt="Payment QR Code"
-            onError={(e) => {
-              e.target.style.display = 'none';
-              e.target.nextSibling.style.display = 'flex';
-            }}
           />
-          <div className="qr-placeholder" style={{ display: 'none' }}>
-            <div className="qr-placeholder-inner">
-              <div className="qr-icon">📱</div>
-              <div>QR Code</div>
-              <div className="qr-sub">Place your QR image in backend/assets/</div>
-            </div>
-          </div>
         </div>
       </div>
 
