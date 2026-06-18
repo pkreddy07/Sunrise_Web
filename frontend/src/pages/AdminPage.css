@@ -1,0 +1,90 @@
+/* frontend/src/pages/AdminPage.css */
+
+.admin-page {
+  min-height: 100vh;
+  background: var(--gray-50);
+  display: flex;
+  flex-direction: column;
+}
+
+.refresh-btn {
+  background: var(--gray-100);
+  border: 2px solid var(--gray-200);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.refresh-btn:hover { background: var(--gray-200); }
+
+/* Tabs */
+.admin-tabs {
+  display: flex;
+  background: white;
+  border-bottom: 2px solid var(--gray-200);
+  padding: 0 24px;
+}
+
+.admin-tab {
+  padding: 14px 24px;
+  border: none;
+  background: transparent;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-500);
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+
+.admin-tab:hover { color: var(--gray-800); }
+
+.admin-tab.active {
+  color: var(--blue);
+  border-bottom-color: var(--blue);
+}
+
+/* Content */
+.admin-content {
+  flex: 1;
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.admin-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.admin-bookings {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section-heading {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gray-800);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.booking-total {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--gray-400);
+}
+
+@media (max-width: 640px) {
+  .admin-content { padding: 16px; }
+  .admin-tabs { padding: 0 12px; }
+  .admin-tab { padding: 12px 14px; font-size: 0.9rem; }
+}

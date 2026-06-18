@@ -1,0 +1,194 @@
+/* frontend/src/components/booking/Step3Payment.css */
+
+.step3 { display: flex; flex-direction: column; gap: 20px; }
+
+.payment-summary {
+  display: flex;
+  background: var(--gray-900);
+  color: white;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.ps-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 10px;
+  border-right: 1px solid rgba(255,255,255,0.1);
+}
+.ps-item:last-child { border-right: none; }
+
+.ps-item span {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.6;
+}
+
+.ps-item strong {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.ps-item.highlight strong {
+  font-size: 1.25rem;
+  color: #4ade80;
+}
+
+/* QR */
+.qr-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.qr-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--gray-700);
+}
+
+.qr-frame {
+  width: 200px;
+  height: 200px;
+  border: 3px solid var(--gray-200);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  box-shadow: var(--shadow);
+}
+
+.qr-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.qr-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gray-50);
+}
+
+.qr-placeholder-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  color: var(--gray-500);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 16px;
+}
+
+.qr-icon { font-size: 2.5rem; }
+.qr-sub { font-size: 0.7rem; opacity: 0.7; }
+
+/* OR divider */
+.or-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.or-line {
+  flex: 1;
+  height: 1px;
+  background: var(--gray-200);
+}
+.or-text {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--gray-400);
+  letter-spacing: 0.1em;
+}
+
+/* Payment options */
+.pm-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--gray-800);
+  margin-bottom: 10px;
+}
+
+.pm-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pm-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 2.5px solid var(--gray-200);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+}
+
+.pm-option input[type="radio"] { display: none; }
+
+.pm-option:hover {
+  border-color: var(--blue);
+}
+
+.pm-option.selected {
+  border-color: var(--blue);
+  background: var(--blue-light);
+}
+
+.pm-icon { font-size: 2rem; flex-shrink: 0; }
+
+.pm-info { flex: 1; }
+
+.pm-name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.pm-desc {
+  font-size: 0.85rem;
+  color: var(--gray-500);
+}
+
+.pm-radio-dot {
+  width: 22px;
+  height: 22px;
+  border: 2.5px solid var(--gray-300);
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.pm-option.selected .pm-radio-dot {
+  border-color: var(--blue);
+  background: var(--blue);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
+}
+
+.step-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.step-actions.two-col { flex-direction: row; }
+
+@media (max-width: 480px) {
+  .step-actions.two-col { flex-direction: column; }
+  .ps-item strong { font-size: 0.9rem; }
+}

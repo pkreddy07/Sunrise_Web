@@ -1,0 +1,30 @@
+/* frontend/src/components/admin/AdminCharts.css */
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.chart-card {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.chart-title {
+  padding: 16px 20px 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--gray-800);
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.chart-body {
+  padding: 12px 4px 8px;
+}
+
+@media (max-width: 900px) {
+  .charts-grid { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,161 @@
+/* frontend/src/components/reception/RoomCard.css */
+
+.room-card {
+  position: relative;
+  border-radius: 20px;
+  padding: 28px 20px 20px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-height: 180px;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+.room-card:active {
+  transform: scale(0.97);
+}
+
+.room-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+}
+
+/* Available Room */
+.room-card.available {
+  background: linear-gradient(145deg, #16a34a, #15803d);
+  color: white;
+  border: 3px solid #14532d;
+}
+
+/* Occupied Room */
+.room-card.occupied {
+  background: linear-gradient(145deg, #dc2626, #b91c1c);
+  color: white;
+  border: 3px solid #7f1d1d;
+}
+
+.room-card-icon {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.room-card-name {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.room-card-status-badge {
+  font-size: 0.875rem;
+  font-weight: 700;
+  padding: 4px 14px;
+  border-radius: 100px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.badge-green {
+  background: rgba(255,255,255,0.25);
+  color: white;
+  border: 1.5px solid rgba(255,255,255,0.5);
+}
+
+.badge-red {
+  background: rgba(255,255,255,0.25);
+  color: white;
+  border: 1.5px solid rgba(255,255,255,0.5);
+}
+
+.room-card-info {
+  width: 100%;
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.room-guest-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.room-checkout-time {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.room-checkout-time .label {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.room-checkout-time .value {
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.room-card-tap-hint {
+  font-size: 0.8rem;
+  opacity: 0.75;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* Dropdown Menu */
+.room-menu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  overflow: hidden;
+  z-index: 50;
+  min-width: 180px;
+  animation: popIn 0.15s ease;
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: translateX(-50%) scale(0.95); }
+  to { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+
+.room-menu-item {
+  display: block;
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  color: var(--gray-800);
+}
+
+.room-menu-item.checkout:hover { background: #fee2e2; color: #dc2626; }
+.room-menu-item.cancel:hover { background: var(--gray-100); }
+
+@media (max-width: 480px) {
+  .room-card {
+    min-height: 150px;
+    padding: 20px 14px 16px;
+  }
+  .room-card-icon { font-size: 2rem; }
+  .room-card-name { font-size: 1.25rem; }
+}

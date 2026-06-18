@@ -1,0 +1,129 @@
+/* frontend/src/pages/ReceptionPage.css */
+
+.reception-page {
+  min-height: 100vh;
+  background: var(--gray-50);
+  display: flex;
+  flex-direction: column;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.refresh-btn {
+  background: var(--gray-100);
+  border: 2px solid var(--gray-200);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.refresh-btn:hover { background: var(--gray-200); }
+
+/* Status Bar */
+.status-bar {
+  background: white;
+  border-bottom: 1px solid var(--gray-100);
+  padding: 10px 24px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 100px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.status-pill.green {
+  background: var(--green-light);
+  color: var(--green-dark);
+}
+
+.status-pill.red {
+  background: var(--red-light);
+  color: var(--red-dark);
+}
+
+.status-pill.gray {
+  background: var(--gray-100);
+  color: var(--gray-600);
+}
+
+.pill-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.status-pill.green .pill-dot { background: var(--green); }
+.status-pill.red .pill-dot { background: var(--red); }
+
+/* Content */
+.page-content {
+  flex: 1;
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Rooms Grid */
+.rooms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+/* Legend */
+.legend {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--gray-200);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--gray-600);
+  font-weight: 500;
+}
+
+.legend-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+.legend-dot.green { background: var(--green); }
+.legend-dot.red { background: var(--red); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page-content { padding: 16px; }
+  .rooms-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+}
+
+@media (max-width: 420px) {
+  .rooms-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .status-bar { padding: 8px 16px; }
+}
