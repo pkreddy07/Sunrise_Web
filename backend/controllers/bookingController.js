@@ -153,6 +153,23 @@ async function getAllBookings(req, res) {
 }
 
 /**
+ * Parse the en-IN toLocaleString format stored in 'Created At':
+ * "DD/MM/YYYY, H:MM:SS am/pm"  →  valid Date object (local time)
+ */
+function parseCreatedAt(dateStr) {
+  if (!dateStr) return null;
+  const m = dateStr.match(
+    /^(\d{1,2})\/(\d{1,2})\/(\d{4}),?\s+(\d{1,2}):(\d{2}):(\d{2})\s*(am|pm)$/i
+  );
+  if (!m) return new Date(dateStr); // fallback for unexpected formats
+  let [, day, month, year, h, min, sec, meridiem] = m;
+  h = parseInt(h);
+  if (/pm/i.test(meridiem) && h !== 12) h += 12;
+  if (/am/i.test(meridiem) && h === 12) h = 0;
+  return new Date(parseInt(year), parseInt(month) - 1, parseInt(day), h, parseInt(min), parseInt(sec));
+}
+
+/**
  * GET /api/admin/analytics
  * Get analytics data
  */
@@ -171,17 +188,17 @@ async function getAnalytics(req, res) {
 
     // Booking counts
     const bookingsToday = bookings.filter((b) => {
-      const created = new Date(b['Created At']);
+      const created = parseCreatedAt(b['Created At']);
       return created.toLocaleDateString('en-IN') === todayStr;
     }).length;
 
     const bookingsThisWeek = bookings.filter((b) => {
-      const created = new Date(b['Created At']);
+      const created = parseCreatedAt(b['Created At']);
       return created >= startOfWeek;
     }).length;
 
     const bookingsThisMonth = bookings.filter((b) => {
-      const created = new Date(b['Created At']);
+      const created = parseCreatedAt(b['Created At']);
       return created >= startOfMonth;
     }).length;
 
@@ -224,7 +241,7 @@ async function getAnalytics(req, res) {
     }
 
     bookings.forEach((b) => {
-      const created = new Date(b['Created At']);
+      const created = parseCreatedAt(b['Created At']);
       const diff = Math.floor((now - created) / (1000 * 60 * 60 * 24));
       if (diff <= 29) {
         const key = created.toLocaleDateString('en-IN', {
@@ -250,7 +267,7 @@ async function getAnalytics(req, res) {
     }
 
     bookings.forEach((b) => {
-      const created = new Date(b['Created At']);
+      const created = parseCreatedAt(b['Created At']);
       const diff = Math.floor((now - created) / (1000 * 60 * 60 * 24));
       if (diff <= 29) {
         const key = created.toLocaleDateString('en-IN', {
