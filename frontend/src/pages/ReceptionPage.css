@@ -45,6 +45,80 @@
 }
 .emergency-invoice-btn:hover { background: #0d5e57; }
 
+/* Desktop / Mobile visibility */
+.desktop-only { display: inline-flex; }
+.mobile-only  { display: none; }
+
+@media (max-width: 768px) {
+  .desktop-only { display: none !important; }
+  .mobile-only  { display: flex; }
+}
+
+/* Kebab trigger button */
+.nav-menu-wrap {
+  position: relative;
+}
+
+.nav-menu-trigger {
+  background: var(--gray-100);
+  border: 2px solid var(--gray-200);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--gray-700);
+  transition: background 0.15s;
+  letter-spacing: 0.05em;
+}
+.nav-menu-trigger:hover { background: var(--gray-200); }
+
+/* Dropdown panel */
+.nav-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+  z-index: 1000;
+  min-width: 190px;
+  animation: navDropIn 0.15s ease;
+}
+
+@keyframes navDropIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+.nav-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 15px 18px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--gray-800);
+  text-decoration: none;
+  border-bottom: 1px solid var(--gray-100);
+  transition: background 0.12s;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.nav-dropdown-item:last-child { border-bottom: none; }
+
+/* Per-item accent on hover */
+.nav-dropdown-item.invoice-item:hover   { background: #f0fdfa; color: #0f766e; }
+.nav-dropdown-item.multibook-item:hover { background: #eff6ff; color: #2563eb; }
+.nav-dropdown-item.prebook-item:hover   { background: #f5f3ff; color: #7c3aed; }
+.nav-dropdown-item.admin-item:hover     { background: var(--gray-50); }
+
 /* Status Bar */
 .status-bar {
   background: white;

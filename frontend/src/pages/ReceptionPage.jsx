@@ -1,5 +1,5 @@
 // frontend/src/pages/ReceptionPage.jsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import RoomCard from '../components/reception/RoomCard';
 import BookingModal from '../components/booking/BookingModal';
@@ -25,6 +25,18 @@ export default function ReceptionPage() {
   const [showMultiBook, setShowMultiBook] = useState(false);
   const [showPreBook, setShowPreBook] = useState(false);
   const [showEmergencyInvoice, setShowEmergencyInvoice] = useState(false);
+  const [showNavMenu, setShowNavMenu] = useState(false);
+  const navMenuRef = useRef(null);
+
+  useEffect(() => {
+    function handleOutside(e) {
+      if (navMenuRef.current && !navMenuRef.current.contains(e.target)) {
+        setShowNavMenu(false);
+      }
+    }
+    document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, []);
 
   const [lastRefresh, setLastRefresh] = useState(new Date());
 
@@ -81,16 +93,49 @@ export default function ReceptionPage() {
         </div>
         <div className="header-right">
           <button className="refresh-btn" onClick={fetchStatuses} title="Refresh">🔄</button>
-          <button className="header-nav-btn multi-book-btn" onClick={() => setShowMultiBook(true)}>
+
+          {/* Desktop — individual buttons */}
+          <button className="header-nav-btn multi-book-btn desktop-only" onClick={() => setShowMultiBook(true)}>
             🏠 Multi-Book
           </button>
-          <button className="header-nav-btn prebook-btn" onClick={() => setShowPreBook(true)}>
+          <button className="header-nav-btn prebook-btn desktop-only" onClick={() => setShowPreBook(true)}>
             📅 Pre-Book
           </button>
-          <button className="header-nav-btn emergency-invoice-btn" onClick={() => setShowEmergencyInvoice(true)}>
+          <button className="header-nav-btn emergency-invoice-btn desktop-only" onClick={() => setShowEmergencyInvoice(true)}>
             🧾 Invoice
           </button>
-          <Link to="/admin-login" className="header-nav-btn">📊 Admin</Link>
+          <Link to="/admin-login" className="header-nav-btn desktop-only">📊 Admin</Link>
+
+          {/* Mobile — kebab menu */}
+          <div className="nav-menu-wrap mobile-only" ref={navMenuRef}>
+            <button
+              className="nav-menu-trigger"
+              onClick={() => setShowNavMenu((p) => !p)}
+              aria-label="Menu"
+            >
+              ⋮
+            </button>
+            {showNavMenu && (
+              <div className="nav-dropdown">
+                <button className="nav-dropdown-item invoice-item"
+                  onClick={() => { setShowEmergencyInvoice(true); setShowNavMenu(false); }}>
+                  🧾 Invoice
+                </button>
+                <button className="nav-dropdown-item multibook-item"
+                  onClick={() => { setShowMultiBook(true); setShowNavMenu(false); }}>
+                  🏠 Multi-Book
+                </button>
+                <button className="nav-dropdown-item prebook-item"
+                  onClick={() => { setShowPreBook(true); setShowNavMenu(false); }}>
+                  📅 Pre-Book
+                </button>
+                <Link to="/admin-login" className="nav-dropdown-item admin-item"
+                  onClick={() => setShowNavMenu(false)}>
+                  📊 Admin
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
