@@ -24,6 +24,27 @@
 }
 .refresh-btn:hover { background: var(--gray-200); }
 
+.multi-book-btn {
+  background: #2563eb;
+  color: white;
+  border-color: #1d4ed8;
+}
+.multi-book-btn:hover { background: #1d4ed8; }
+
+.prebook-btn {
+  background: #7c3aed;
+  color: white;
+  border-color: #6d28d9;
+}
+.prebook-btn:hover { background: #6d28d9; }
+
+.emergency-invoice-btn {
+  background: #0f766e;
+  color: white;
+  border-color: #0d5e57;
+}
+.emergency-invoice-btn:hover { background: #0d5e57; }
+
 /* Status Bar */
 .status-bar {
   background: white;

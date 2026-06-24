@@ -14,7 +14,7 @@ export default function CheckoutModal({ room, booking, onClose, onSuccess }) {
     setLoading(true);
     setError('');
     try {
-      const result = await checkoutBooking(booking['Booking ID']);
+      const result = await checkoutBooking(booking['Booking ID'], booking['Room Number']);
       if (result.success) {
         onSuccess && onSuccess();
         onClose();

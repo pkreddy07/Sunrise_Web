@@ -31,8 +31,18 @@ export async function createBooking(bookingData) {
   return res.data;
 }
 
-export async function checkoutBooking(bookingId) {
-  const res = await api.post('/bookings/checkout', { bookingId });
+export async function createMultipleBookings(data) {
+  const res = await api.post('/bookings/multiple', data);
+  return res.data;
+}
+
+export async function createPreBooking(data) {
+  const res = await api.post('/bookings/prebook', data);
+  return res.data;
+}
+
+export async function checkoutBooking(bookingId, roomNumber) {
+  const res = await api.post('/bookings/checkout', { bookingId, roomNumber });
   return res.data;
 }
 

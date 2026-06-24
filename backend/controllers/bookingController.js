@@ -3,13 +3,18 @@ const { v4: uuidv4 } = require('uuid');
 const sheetsService = require('../services/googleSheets');
 
 /**
- * Generate booking ID: BK-YYYYMMDD-XXXX
+ * Generate booking ID: BK-YYYYMMDD-HHMM (IST)
  */
 function generateBookingId() {
-  const now = new Date();
-  const date = now.toISOString().slice(0, 10).replace(/-/g, '');
-  const random = Math.floor(1000 + Math.random() * 9000);
-  return `BK-${date}-${random}`;
+  // Shift UTC to IST (UTC+5:30 = +330 min) then read via UTC getters
+  const ist = new Date(Date.now() + 330 * 60 * 1000);
+  const pad = (n) => String(n).padStart(2, '0');
+  const y = ist.getUTCFullYear();
+  const m = pad(ist.getUTCMonth() + 1);
+  const d = pad(ist.getUTCDate());
+  const h = pad(ist.getUTCHours());
+  const min = pad(ist.getUTCMinutes());
+  return `BK-${y}${m}${d}-${h}${min}`;
 }
 
 /**
@@ -109,7 +114,7 @@ async function getRoomStatuses(req, res) {
  */
 async function checkoutBooking(req, res) {
   try {
-    const { bookingId } = req.body;
+    const { bookingId, roomNumber } = req.body;
 
     if (!bookingId) {
       return res
@@ -121,7 +126,7 @@ async function checkoutBooking(req, res) {
       timeZone: 'Asia/Kolkata',
     });
 
-    await sheetsService.checkoutBooking(bookingId, actualCheckout);
+    await sheetsService.checkoutBooking(bookingId, actualCheckout, roomNumber);
 
     return res.json({
       success: true,
@@ -302,8 +307,127 @@ async function getAnalytics(req, res) {
   }
 }
 
+/**
+ * POST /api/bookings/multiple
+ * Create one booking row per room for multiple rooms under one guest
+ */
+async function createMultipleBookings(req, res) {
+  try {
+    const {
+      rooms, // [{ roomNumber, roomType, roomCost }]
+      customerName,
+      dob, age, gender,
+      contactNumber, address, aadhaarNumber,
+      checkInDateTime, checkOutDateTime,
+      paymentType,
+    } = req.body;
+
+    if (!rooms || !Array.isArray(rooms) || rooms.length === 0) {
+      return res.status(400).json({ success: false, message: 'No rooms specified' });
+    }
+    if (!customerName || !checkInDateTime || !checkOutDateTime) {
+      return res.status(400).json({ success: false, message: 'Missing required fields' });
+    }
+
+    const createdAt = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+    // All rooms in one multi-booking share a single booking ID (group invoice)
+    const groupBookingId = generateBookingId();
+
+    for (const room of rooms) {
+      await sheetsService.appendBooking({
+        'Booking ID': groupBookingId,
+        'Room Number': room.roomNumber,
+        'Room Type': room.roomType,
+        'Room Cost': room.roomCost || '',
+        'Customer Name': customerName,
+        'DOB': dob || '',
+        'Age': age || '',
+        'Gender': gender || '',
+        'Contact Number': contactNumber || '',
+        'Address': address || '',
+        'Aadhaar Number': aadhaarNumber || '',
+        'Check-In DateTime': checkInDateTime,
+        'Expected Check-Out DateTime': checkOutDateTime,
+        'Actual Check-Out DateTime': '',
+        'Payment Type': paymentType || '',
+        'Booking Status': 'ACTIVE',
+        'Created At': createdAt,
+        'Advance Paid': '',
+      });
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: `${rooms.length} bookings created successfully`,
+      bookingId: groupBookingId,
+    });
+  } catch (error) {
+    console.error('Create multiple bookings error:', error);
+    return res.status(500).json({ success: false, message: error.message || 'Server error' });
+  }
+}
+
+/**
+ * POST /api/bookings/prebook
+ * Create future/pre-bookings (status = FUTURE), one row per room
+ */
+async function createPreBooking(req, res) {
+  try {
+    const {
+      rooms, // [{ roomNumber, roomType, roomCost }]
+      customerName,
+      contactNumber,
+      checkInDateTime, checkOutDateTime,
+      advancePaid,
+    } = req.body;
+
+    if (!rooms || !Array.isArray(rooms) || rooms.length === 0) {
+      return res.status(400).json({ success: false, message: 'No rooms specified' });
+    }
+    if (!customerName || !checkInDateTime || !checkOutDateTime) {
+      return res.status(400).json({ success: false, message: 'Missing required fields' });
+    }
+
+    const createdAt = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+    const bookingIds = [];
+
+    for (const room of rooms) {
+      const bookingId = generateBookingId();
+      await sheetsService.appendBooking({
+        'Booking ID': bookingId,
+        'Room Number': room.roomNumber,
+        'Room Type': room.roomType,
+        'Room Cost': room.roomCost || '',
+        'Customer Name': customerName,
+        'DOB': '', 'Age': '', 'Gender': '',
+        'Contact Number': contactNumber || '',
+        'Address': '', 'Aadhaar Number': '',
+        'Check-In DateTime': checkInDateTime,
+        'Expected Check-Out DateTime': checkOutDateTime,
+        'Actual Check-Out DateTime': '',
+        'Payment Type': '',
+        'Booking Status': 'FUTURE',
+        'Created At': createdAt,
+        'Advance Paid': advancePaid !== undefined ? String(advancePaid) : '0',
+      });
+      bookingIds.push(bookingId);
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: `${rooms.length} pre-bookings created successfully`,
+      bookingIds,
+    });
+  } catch (error) {
+    console.error('Create pre-booking error:', error);
+    return res.status(500).json({ success: false, message: error.message || 'Server error' });
+  }
+}
+
 module.exports = {
   createBooking,
+  createMultipleBookings,
+  createPreBooking,
   getRoomStatuses,
   checkoutBooking,
   getAllBookings,

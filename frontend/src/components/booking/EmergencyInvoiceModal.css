@@ -1,0 +1,165 @@
+/* frontend/src/components/booking/EmergencyInvoiceModal.css */
+
+.ei-modal-box {
+  max-width: 680px !important;
+}
+
+.ei-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.ei-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ei-full-width {
+  grid-column: 1 / -1;
+}
+
+.ei-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gray-600);
+}
+
+.ei-input {
+  padding: 10px 12px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  background: white;
+  transition: border-color 0.15s;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  color: var(--gray-800);
+  resize: vertical;
+}
+
+.ei-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.ei-readonly {
+  background: var(--gray-50);
+  color: var(--gray-500);
+  cursor: default;
+}
+
+/* ── Counter rows ── */
+.ei-counter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ei-counter-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 10px;
+  background: white;
+}
+
+.ei-counter-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ei-counter-icon {
+  font-size: 1.3rem;
+}
+
+.ei-counter-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--gray-800);
+}
+
+.ei-counter-price {
+  font-size: 0.8rem;
+  color: var(--gray-500);
+}
+
+.ei-counter-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ei-cnt-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--gray-300);
+  background: white;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  color: var(--gray-700);
+  line-height: 1;
+}
+
+.ei-cnt-btn:hover {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  color: #3b82f6;
+}
+
+.ei-cnt-val {
+  font-size: 1rem;
+  font-weight: 700;
+  min-width: 20px;
+  text-align: center;
+  color: var(--gray-800);
+}
+
+/* ── Room slot inputs ── */
+.ei-slot-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ei-slot-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ei-slot-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--gray-600);
+  min-width: 140px;
+}
+
+.ei-slot-input {
+  flex: 1;
+  padding: 8px 12px !important;
+}
+
+@media (max-width: 580px) {
+  .ei-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .ei-full-width {
+    grid-column: 1;
+  }
+  .ei-slot-label {
+    min-width: 110px;
+  }
+}

@@ -20,7 +20,25 @@ const COLUMNS = [
   'Payment Type',
   'Booking Status',
   'Created At',
+  'Advance Paid',
 ];
+
+// Parse "DD/MM/YYYY, HH:MM am/pm" or "DD/MM/YYYY, HH:MM:SS am/pm" → Date
+function parseSheetDateTime(str) {
+  if (!str) return null;
+  const m = str.match(
+    /^(\d{1,2})\/(\d{1,2})\/(\d{4}),?\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(am|pm)$/i
+  );
+  if (!m) return new Date(str);
+  let [, day, month, year, h, min, sec, meridiem] = m;
+  h = parseInt(h);
+  if (/pm/i.test(meridiem) && h !== 12) h += 12;
+  if (/am/i.test(meridiem) && h === 12) h = 0;
+  return new Date(
+    parseInt(year), parseInt(month) - 1, parseInt(day),
+    h, parseInt(min), parseInt(sec || 0)
+  );
+}
 
 function getAuthClient() {
   const privateKey = process.env.GOOGLE_PRIVATE_KEY
@@ -50,7 +68,7 @@ async function ensureHeaders() {
 
   const response = await sheets.spreadsheets.values.get({
     spreadsheetId: sheetId,
-    range: `${SHEET_NAME}!A1:Q1`,
+    range: `${SHEET_NAME}!A1:R1`,
   });
 
   if (!response.data.values || response.data.values.length === 0) {
@@ -70,7 +88,7 @@ async function getAllBookings() {
 
   const response = await sheets.spreadsheets.values.get({
     spreadsheetId: sheetId,
-    range: `${SHEET_NAME}!A:Q`,
+    range: `${SHEET_NAME}!A:R`,
   });
 
   const rows = response.data.values || [];
@@ -96,7 +114,7 @@ async function appendBooking(bookingData) {
 
   await sheets.spreadsheets.values.append({
     spreadsheetId: sheetId,
-    range: `${SHEET_NAME}!A:Q`,
+    range: `${SHEET_NAME}!A:R`,
     valueInputOption: 'RAW',
     insertDataOption: 'INSERT_ROWS',
     requestBody: { values: [row] },
@@ -111,7 +129,7 @@ async function updateRow(rowIndex, updates) {
   // First get the existing row data
   const response = await sheets.spreadsheets.values.get({
     spreadsheetId: sheetId,
-    range: `${SHEET_NAME}!A${rowIndex}:Q${rowIndex}`,
+    range: `${SHEET_NAME}!A${rowIndex}:R${rowIndex}`,
   });
 
   const existingRow = response.data.values ? response.data.values[0] : [];
@@ -124,40 +142,54 @@ async function updateRow(rowIndex, updates) {
 
   await sheets.spreadsheets.values.update({
     spreadsheetId: sheetId,
-    range: `${SHEET_NAME}!A${rowIndex}:Q${rowIndex}`,
+    range: `${SHEET_NAME}!A${rowIndex}:R${rowIndex}`,
     valueInputOption: 'RAW',
     requestBody: { values: [updatedRow] },
   });
 }
 
-// Get active bookings per room
+// Get room statuses — explicitly based on booking status + check-in/out datetime
 async function getRoomStatuses() {
   const bookings = await getAllBookings();
+  const now = new Date();
   const roomStatus = {};
 
-  // Initialize all rooms as available
   for (let i = 1; i <= 7; i++) {
-    roomStatus[`Room ${i}`] = { status: 'AVAILABLE', booking: null };
+    roomStatus[`Room ${i}`] = { status: 'AVAILABLE', booking: null, futureBookings: [] };
   }
 
-  // Find active bookings
   bookings.forEach((booking) => {
-    if (booking['Booking Status'] === 'ACTIVE') {
-      const room = booking['Room Number'];
-      roomStatus[room] = {
-        status: 'OCCUPIED',
-        booking: booking,
-      };
+    const room = booking['Room Number'];
+    if (!roomStatus[room]) return;
+
+    const status = booking['Booking Status'];
+
+    if (status === 'ACTIVE') {
+      const checkIn = parseSheetDateTime(booking['Check-In DateTime']);
+      if (checkIn && now >= checkIn) {
+        // Guest has arrived — room is occupied
+        roomStatus[room].status = 'OCCUPIED';
+        roomStatus[room].booking = booking;
+      } else if (checkIn && now < checkIn) {
+        // Confirmed booking with a future check-in date
+        roomStatus[room].futureBookings.push(booking);
+      }
+    } else if (status === 'FUTURE') {
+      // Pre-booking
+      roomStatus[room].futureBookings.push(booking);
     }
   });
 
   return roomStatus;
 }
 
-// Checkout: update booking status and actual checkout time
-async function checkoutBooking(bookingId, actualCheckoutTime) {
+// Checkout: update booking status and actual checkout time.
+// roomNumber is required when multiple rows share the same bookingId (multi-room group booking).
+async function checkoutBooking(bookingId, actualCheckoutTime, roomNumber) {
   const bookings = await getAllBookings();
-  const booking = bookings.find((b) => b['Booking ID'] === bookingId);
+  const booking = bookings.find(
+    (b) => b['Booking ID'] === bookingId && (!roomNumber || b['Room Number'] === roomNumber)
+  );
 
   if (!booking) throw new Error('Booking not found');
 

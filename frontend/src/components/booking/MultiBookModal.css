@@ -1,0 +1,248 @@
+/* frontend/src/components/booking/MultiBookModal.css */
+
+.mb-step {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mb-hint {
+  font-size: 0.875rem;
+  color: var(--gray-500);
+  margin: 0;
+}
+
+.mb-back-btn {
+  margin-bottom: 8px;
+}
+
+/* ── Room Selection Grid ── */
+.mb-room-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.mb-room-chip {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 10px;
+  border-radius: 14px;
+  border: 2px solid var(--gray-200);
+  background: white;
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.mb-room-chip:hover:not(.mb-chip-disabled) {
+  border-color: var(--blue-500, #3b82f6);
+  background: #eff6ff;
+}
+
+.mb-chip-selected {
+  border-color: var(--blue-600, #2563eb) !important;
+  background: #eff6ff !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.mb-chip-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: var(--gray-50);
+}
+
+.mb-chip-icon { font-size: 1.5rem; }
+
+.mb-chip-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--gray-700);
+}
+
+.mb-chip-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #dc2626;
+  background: #fee2e2;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.mb-chip-check {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 0.8rem;
+  color: #2563eb;
+  font-weight: 800;
+}
+
+/* ── Room Type Counters ── */
+.mb-counter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mb-counter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+.mb-counter-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mb-counter-icon { font-size: 1.4rem; }
+
+.mb-counter-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.mb-counter-price {
+  font-size: 0.78rem;
+  color: var(--gray-500);
+}
+
+.mb-counter-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mb-cnt-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--gray-300);
+  background: white;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  color: var(--gray-700);
+}
+
+.mb-cnt-btn:hover { background: var(--gray-100); border-color: var(--gray-400); }
+.mb-cnt-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.mb-cnt-val {
+  font-size: 1.1rem;
+  font-weight: 800;
+  min-width: 24px;
+  text-align: center;
+  color: var(--gray-800);
+}
+
+/* ── Total Bar ── */
+.mb-total-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: var(--gray-100);
+  border: 2px solid var(--gray-200);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--gray-600);
+  transition: all 0.2s;
+}
+
+.mb-total-ok {
+  background: #ecfdf5;
+  border-color: #6ee7b7;
+  color: #059669;
+}
+
+.mb-total-warn {
+  font-size: 0.8rem;
+  color: #dc2626;
+  margin: 0;
+}
+
+/* ── Payment Summary ── */
+.mb-payment-summary {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mb-ps-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  color: var(--gray-600);
+}
+
+.mb-ps-row strong { color: var(--gray-800); }
+
+.mb-ps-row.highlight {
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--gray-200);
+  font-size: 1rem;
+}
+
+.mb-ps-row.highlight strong { color: #2563eb; font-size: 1.1rem; }
+
+/* ── Success ── */
+.mb-success {
+  align-items: center;
+  text-align: center;
+  padding: 24px 16px;
+}
+
+.mb-booking-ids {
+  width: 100%;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 8px 0 16px;
+}
+
+.mb-id-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--gray-100);
+  font-size: 0.875rem;
+}
+
+.mb-id-row:last-child { border-bottom: none; }
+
+.mb-id-room {
+  font-weight: 700;
+  color: var(--gray-700);
+}
+
+.mb-id-code {
+  font-family: monospace;
+  font-weight: 700;
+  color: #2563eb;
+  font-size: 0.8rem;
+}

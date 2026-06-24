@@ -12,6 +12,8 @@ router.get('/rooms/status', bookingController.getRoomStatuses);
 
 // ─── Booking Routes ────────────────────────────────────────
 router.post('/bookings', bookingController.createBooking);
+router.post('/bookings/multiple', bookingController.createMultipleBookings);
+router.post('/bookings/prebook', bookingController.createPreBooking);
 router.get('/bookings', bookingController.getAllBookings);
 router.post('/bookings/checkout', bookingController.checkoutBooking);
 

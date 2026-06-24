@@ -114,17 +114,22 @@
   font-weight: 500;
 }
 
-/* Dropdown Menu */
+/* Raise card above siblings when a panel is open */
+.room-card.card-active {
+  z-index: 300;
+}
+
+/* Dropdown Menu — appears BELOW the card */
 .room-menu {
   position: absolute;
-  bottom: calc(100% + 8px);
+  top: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
   background: white;
   border-radius: 14px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.2);
   overflow: hidden;
-  z-index: 50;
+  z-index: 400;
   min-width: 180px;
   animation: popIn 0.15s ease;
 }
@@ -150,6 +155,137 @@
 
 .room-menu-item.checkout:hover { background: #fee2e2; color: #dc2626; }
 .room-menu-item.cancel:hover { background: var(--gray-100); }
+
+/* Future bookings icon */
+.future-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.25);
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  padding: 3px 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  transition: background 0.15s;
+  z-index: 10;
+}
+
+.future-btn:hover { background: rgba(255, 255, 255, 0.4); }
+
+.future-badge {
+  background: #facc15;
+  color: #1e293b;
+  font-size: 0.65rem;
+  font-weight: 800;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Future bookings panel */
+.future-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 270px;
+  max-height: 320px;
+  overflow-y: auto;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  z-index: 400;
+  color: #1e293b;
+  animation: popIn 0.15s ease;
+}
+
+.future-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e293b;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.future-panel-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #64748b;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.future-panel-close:hover { background: #f1f5f9; }
+
+.future-empty {
+  padding: 16px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.future-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.future-item {
+  padding: 10px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.future-item:last-child { border-bottom: none; }
+
+.future-item-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.78rem;
+}
+
+.fi-label {
+  min-width: 28px;
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.fi-value {
+  color: #1e293b;
+  font-weight: 500;
+  flex: 1;
+}
+
+.future-item-status {
+  margin-top: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #7c3aed;
+  background: #ede9fe;
+  padding: 2px 6px;
+  border-radius: 4px;
+  align-self: flex-start;
+}
 
 @media (max-width: 480px) {
   .room-card {

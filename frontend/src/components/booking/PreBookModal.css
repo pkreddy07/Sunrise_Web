@@ -1,0 +1,17 @@
+/* frontend/src/components/booking/PreBookModal.css */
+
+.pb-step {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pb-advance {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pb-advance .form-input {
+  max-width: 200px;
+}

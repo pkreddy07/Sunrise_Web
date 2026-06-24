@@ -4,6 +4,9 @@ import { Link } from 'react-router-dom';
 import RoomCard from '../components/reception/RoomCard';
 import BookingModal from '../components/booking/BookingModal';
 import CheckoutModal from '../components/booking/CheckoutModal';
+import MultiBookModal from '../components/booking/MultiBookModal';
+import PreBookModal from '../components/booking/PreBookModal';
+import EmergencyInvoiceModal from '../components/booking/EmergencyInvoiceModal';
 import { getRoomStatuses } from '../services/api';
 import './ReceptionPage.css';
 
@@ -18,7 +21,10 @@ export default function ReceptionPage() {
   const [error, setError] = useState('');
 
   const [bookingRoom, setBookingRoom] = useState(null);
-  const [checkoutInfo, setCheckoutInfo] = useState(null); // { room, booking }
+  const [checkoutInfo, setCheckoutInfo] = useState(null);
+  const [showMultiBook, setShowMultiBook] = useState(false);
+  const [showPreBook, setShowPreBook] = useState(false);
+  const [showEmergencyInvoice, setShowEmergencyInvoice] = useState(false);
 
   const [lastRefresh, setLastRefresh] = useState(new Date());
 
@@ -39,7 +45,6 @@ export default function ReceptionPage() {
 
   useEffect(() => {
     fetchStatuses();
-    // Auto-refresh every 60 seconds
     const interval = setInterval(fetchStatuses, 60000);
     return () => clearInterval(interval);
   }, [fetchStatuses]);
@@ -58,17 +63,10 @@ export default function ReceptionPage() {
     }
   }
 
-  function handleBookingSuccess() {
-    fetchStatuses();
-  }
+  function handleBookingSuccess() { fetchStatuses(); }
+  function handleCheckoutSuccess() { fetchStatuses(); }
 
-  function handleCheckoutSuccess() {
-    fetchStatuses();
-  }
-
-  const occupiedCount = Object.values(roomStatuses).filter(
-    (r) => r.status === 'OCCUPIED'
-  ).length;
+  const occupiedCount = Object.values(roomStatuses).filter((r) => r.status === 'OCCUPIED').length;
   const availableCount = 7 - occupiedCount;
 
   return (
@@ -82,16 +80,17 @@ export default function ReceptionPage() {
           </div>
         </div>
         <div className="header-right">
-          <button
-            className="refresh-btn"
-            onClick={fetchStatuses}
-            title="Refresh"
-          >
-            🔄
+          <button className="refresh-btn" onClick={fetchStatuses} title="Refresh">🔄</button>
+          <button className="header-nav-btn multi-book-btn" onClick={() => setShowMultiBook(true)}>
+            🏠 Multi-Book
           </button>
-          <Link to="/admin-login" className="header-nav-btn">
-            📊 Admin
-          </Link>
+          <button className="header-nav-btn prebook-btn" onClick={() => setShowPreBook(true)}>
+            📅 Pre-Book
+          </button>
+          <button className="header-nav-btn emergency-invoice-btn" onClick={() => setShowEmergencyInvoice(true)}>
+            🧾 Invoice
+          </button>
+          <Link to="/admin-login" className="header-nav-btn">📊 Admin</Link>
         </div>
       </header>
 
@@ -115,9 +114,7 @@ export default function ReceptionPage() {
         <div className="page-content">
           <div className="alert alert-error">
             ⚠️ {error}
-            <button onClick={fetchStatuses} style={{ marginLeft: 12, fontWeight: 700 }}>
-              Retry
-            </button>
+            <button onClick={fetchStatuses} style={{ marginLeft: 12, fontWeight: 700 }}>Retry</button>
           </div>
         </div>
       )}
@@ -132,13 +129,14 @@ export default function ReceptionPage() {
         ) : (
           <div className="rooms-grid">
             {ROOMS.map((roomName) => {
-              const roomData = roomStatuses[roomName] || { status: 'AVAILABLE' };
+              const roomData = roomStatuses[roomName] || { status: 'AVAILABLE', futureBookings: [] };
               return (
                 <RoomCard
                   key={roomName}
                   roomName={roomName}
                   status={roomData.status}
                   booking={roomData.booking}
+                  futureBookings={roomData.futureBookings || []}
                   onClick={(action) => handleRoomClick(roomName, action)}
                 />
               );
@@ -146,7 +144,6 @@ export default function ReceptionPage() {
           </div>
         )}
 
-        {/* Legend */}
         <div className="legend">
           <div className="legend-item">
             <span className="legend-dot green"></span>
@@ -156,10 +153,14 @@ export default function ReceptionPage() {
             <span className="legend-dot red"></span>
             <span>Red = Occupied — Tap to Checkout</span>
           </div>
+          <div className="legend-item">
+            <span style={{ fontSize: '1rem' }}>📅</span>
+            <span>Calendar icon = View future bookings</span>
+          </div>
         </div>
       </main>
 
-      {/* Booking Modal */}
+      {/* Single Room Booking Modal */}
       {bookingRoom && (
         <BookingModal
           roomName={bookingRoom}
@@ -176,6 +177,28 @@ export default function ReceptionPage() {
           onClose={() => setCheckoutInfo(null)}
           onSuccess={handleCheckoutSuccess}
         />
+      )}
+
+      {/* Multi-Room Booking Modal */}
+      {showMultiBook && (
+        <MultiBookModal
+          roomStatuses={roomStatuses}
+          onClose={() => setShowMultiBook(false)}
+          onSuccess={handleBookingSuccess}
+        />
+      )}
+
+      {/* Pre-Book Modal */}
+      {showPreBook && (
+        <PreBookModal
+          onClose={() => setShowPreBook(false)}
+          onSuccess={fetchStatuses}
+        />
+      )}
+
+      {/* Emergency Invoice Modal */}
+      {showEmergencyInvoice && (
+        <EmergencyInvoiceModal onClose={() => setShowEmergencyInvoice(false)} />
       )}
     </div>
   );
