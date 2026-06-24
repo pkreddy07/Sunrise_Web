@@ -1,6 +1,6 @@
 // backend/services/ocrService.js
 const Tesseract = require('tesseract.js');
-const sharp = require('sharp');
+const Jimp = require('jimp');
 const jsQR = require('jsqr');
 
 async function extractTextFromImage(base64Image) {
@@ -150,12 +150,9 @@ function calculateAge(dobString) {
 async function extractFromQR(base64Image) {
   try {
     const imageBuffer = Buffer.from(base64Image, 'base64');
-    const { data, info } = await sharp(imageBuffer)
-      .ensureAlpha()
-      .raw()
-      .toBuffer({ resolveWithObject: true });
-
-    const code = jsQR(new Uint8ClampedArray(data), info.width, info.height);
+    const image = await Jimp.read(imageBuffer);
+    const { data, width, height } = image.bitmap;
+    const code = jsQR(new Uint8ClampedArray(data), width, height);
     if (!code || !code.data) return null;
 
     return parseAadhaarQR(code.data);
