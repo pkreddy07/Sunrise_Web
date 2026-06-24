@@ -24,6 +24,9 @@ const COLUMNS = [
 ];
 
 // Parse "DD/MM/YYYY, HH:MM am/pm" or "DD/MM/YYYY, HH:MM:SS am/pm" → Date
+// Values in the sheet are stored as IST (Asia/Kolkata, UTC+5:30).
+// Use Date.UTC then subtract the IST offset so the result is always the
+// correct UTC instant regardless of the server's local timezone.
 function parseSheetDateTime(str) {
   if (!str) return null;
   const m = str.match(
@@ -34,10 +37,11 @@ function parseSheetDateTime(str) {
   h = parseInt(h);
   if (/pm/i.test(meridiem) && h !== 12) h += 12;
   if (/am/i.test(meridiem) && h === 12) h = 0;
-  return new Date(
+  const utcMs = Date.UTC(
     parseInt(year), parseInt(month) - 1, parseInt(day),
     h, parseInt(min), parseInt(sec || 0)
-  );
+  ) - 330 * 60 * 1000; // subtract IST offset (UTC+5:30)
+  return new Date(utcMs);
 }
 
 function getAuthClient() {
