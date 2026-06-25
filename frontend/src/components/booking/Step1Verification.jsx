@@ -48,7 +48,7 @@ export default function Step1Verification({ formData, onChange, onNext }) {
     }
   }
 
-  // Name image: front OCR → only fills fullName
+  // Name image: front OCR → fills fullName + aadhaarNumber (both if found)
   async function handleNameCapture(imageDataUrl) {
     setNamePreview(imageDataUrl);
     if (!imageDataUrl) { setNameStatus(''); return; }
@@ -56,8 +56,13 @@ export default function Step1Verification({ formData, onChange, onNext }) {
     setError('');
     try {
       const result = await processOcrFront(imageDataUrl);
-      if (result.success && result.data.fullName) {
-        onChange({ ...formData, fullName: result.data.fullName });
+      const { fullName, aadhaarNumber } = result.data || {};
+      if (result.success && (fullName || aadhaarNumber)) {
+        onChange({
+          ...formData,
+          ...(fullName      ? { fullName }      : {}),
+          ...(aadhaarNumber ? { aadhaarNumber } : {}),
+        });
         setNameStatus('success');
       } else {
         setNameStatus('error');
@@ -166,10 +171,10 @@ export default function Step1Verification({ formData, onChange, onNext }) {
               loading={nameLoading}
             />
             {nameStatus === 'success' && (
-              <div className="ocr-badge success">✅ Name extracted</div>
+              <div className="ocr-badge success">✅ Name & Aadhar number extracted</div>
             )}
             {nameStatus === 'error' && (
-              <div className="ocr-badge error">❌ Could not extract name — fill manually</div>
+              <div className="ocr-badge error">❌ Could not extract name, aadhar — fill manually</div>
             )}
 
             <ImageCapture
