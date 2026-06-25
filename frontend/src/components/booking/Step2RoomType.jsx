@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import './Step2RoomType.css';
 
 const ROOM_TYPES = [
-  { name: 'Room only', price: 1500, icon: '🏛️', desc: 'Elegant & comfortable room' },
+  { name: 'Room only', price: 1600, icon: '🏛️', desc: 'Elegant & comfortable room' },
   { name: 'Room + breakfast', price: 1800, icon: '🍽️', desc: 'Elegant & comfortable room, inclusive of breakfast' },
   { name: 'Luxury', price: 2000, icon: '👑', desc: 'Ultimate luxury experience' },
 ];

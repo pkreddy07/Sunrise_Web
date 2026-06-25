@@ -18,21 +18,6 @@ function formatDT(dtLocal) {
   });
 }
 
-// Compute age from "DD/MM/YYYY" string
-function calcAgeFromDob(dob) {
-  if (!dob) return null;
-  const parts = dob.split('/');
-  if (parts.length !== 3) return null;
-  const [d, m, y] = parts.map(Number);
-  if (!y || !m || !d) return null;
-  const birth = new Date(y, m - 1, d);
-  if (isNaN(birth.getTime())) return null;
-  const now = new Date();
-  let age = now.getFullYear() - birth.getFullYear();
-  const mo = now.getMonth() - birth.getMonth();
-  if (mo < 0 || (mo === 0 && now.getDate() < birth.getDate())) age--;
-  return age >= 0 ? age : null;
-}
 
 /**
  * @param {string} bookingId
@@ -141,17 +126,6 @@ export function generateInvoice(bookingId, formData, rooms = null) {
   sectionHeading('GUEST DETAILS');
 
   field('Name', formData.fullName);
-
-  // Age: compute from DOB if present, else fall back to formData.age
-  const ageFromDob = calcAgeFromDob(formData.dob);
-  if (ageFromDob !== null) {
-    field('Age', `${ageFromDob} years`);
-  } else if (formData.age) {
-    field('Age', `${formData.age} years`);
-  }
-
-  field('Date of Birth', formData.dob);
-  field('Gender', formData.gender);
   field('Contact No.', formData.contactNumber);
   field('Aadhaar No.', maskAadhaar(formData.aadhaarNumber));
   field('Address', formData.address);

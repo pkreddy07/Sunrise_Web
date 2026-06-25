@@ -6,6 +6,7 @@ export default function ImageCapture({ label, onCapture, preview, loading }) {
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+  const guideBoxRef = useRef(null);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [stream, setStream] = useState(null);
 
@@ -37,14 +38,46 @@ export default function ImageCapture({ label, onCapture, preview, loading }) {
   function capturePhoto() {
     const video = videoRef.current;
     const canvas = canvasRef.current;
+    const guideBox = guideBoxRef.current;
     if (!video || !canvas) return;
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0);
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    const vW = video.videoWidth;
+    const vH = video.videoHeight;
+    const cW = video.clientWidth;
+    const cH = video.clientHeight;
 
+    if (guideBox && vW && vH && cW && cH) {
+      // object-fit:cover scale: whichever axis fills the container
+      const scale = Math.max(cW / vW, cH / vH);
+      // how many video-pixels are hidden on each side due to cover cropping
+      const hiddenX = (vW * scale - cW) / 2 / scale;
+      const hiddenY = (vH * scale - cH) / 2 / scale;
+
+      // guide box position in display-pixels relative to the video element
+      const videoRect = video.getBoundingClientRect();
+      const guideRect = guideBox.getBoundingClientRect();
+      const gLeft = guideRect.left - videoRect.left;
+      const gTop  = guideRect.top  - videoRect.top;
+      const gW    = guideRect.width;
+      const gH    = guideRect.height;
+
+      // convert to actual video-pixel coordinates
+      const sx = gLeft / scale + hiddenX;
+      const sy = gTop  / scale + hiddenY;
+      const sw = gW / scale;
+      const sh = gH / scale;
+
+      canvas.width  = Math.round(sw);
+      canvas.height = Math.round(sh);
+      canvas.getContext('2d').drawImage(video, sx, sy, sw, sh, 0, 0, sw, sh);
+    } else {
+      // fallback: full frame
+      canvas.width  = vW;
+      canvas.height = vH;
+      canvas.getContext('2d').drawImage(video, 0, 0);
+    }
+
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
     closeCamera();
     onCapture(dataUrl);
   }
@@ -128,7 +161,7 @@ export default function ImageCapture({ label, onCapture, preview, loading }) {
                 muted
               />
               <div className="camera-guide-overlay">
-                <div className="guide-box"></div>
+                <div className="guide-box" ref={guideBoxRef}></div>
               </div>
             </div>
             <div className="camera-footer">

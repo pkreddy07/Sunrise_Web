@@ -8,7 +8,7 @@ import './MultiBookModal.css';
 const ALL_ROOMS = ['Room 1', 'Room 2', 'Room 3', 'Room 4', 'Room 5', 'Room 6', 'Room 7'];
 
 const ROOM_TYPES = [
-  { name: 'Room only', price: 1500, icon: '🏛️' },
+  { name: 'Room only', price: 1600, icon: '🏛️' },
   { name: 'Room + breakfast', price: 1800, icon: '🍽️' },
   { name: 'Luxury', price: 2000, icon: '👑' },
 ];

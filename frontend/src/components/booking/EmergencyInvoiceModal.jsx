@@ -4,7 +4,7 @@ import { generateInvoice } from '../../utils/generateInvoice';
 import './EmergencyInvoiceModal.css';
 
 const ROOM_TYPES = [
-  { name: 'Room only', price: 1500, icon: '🏛️' },
+  { name: 'Room only', price: 1600, icon: '🏛️' },
   { name: 'Room + breakfast', price: 1800, icon: '🍽️' },
   { name: 'Luxury', price: 2000, icon: '👑' },
 ];
@@ -13,21 +13,6 @@ function generateEmergencyId() {
   const now = new Date();
   const pad = (n) => String(n).padStart(2, '0');
   return `BK-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}`;
-}
-
-function calcAge(dob) {
-  if (!dob) return '';
-  const parts = dob.split('/');
-  if (parts.length !== 3) return '';
-  const [d, m, y] = parts.map(Number);
-  if (!y || !m || !d) return '';
-  const birth = new Date(y, m - 1, d);
-  if (isNaN(birth.getTime())) return '';
-  const now = new Date();
-  let age = now.getFullYear() - birth.getFullYear();
-  const mo = now.getMonth() - birth.getMonth();
-  if (mo < 0 || (mo === 0 && now.getDate() < birth.getDate())) age--;
-  return age >= 0 ? String(age) : '';
 }
 
 // Build rooms[] in the same sequential order as the counter UI
@@ -56,8 +41,7 @@ function slotLabels(typeCounts) {
 
 export default function EmergencyInvoiceModal({ onClose }) {
   const [formData, setFormData] = useState({
-    fullName: '', dob: '', age: '', gender: '',
-    contactNumber: '', aadhaarNumber: '', address: '',
+    fullName: '', contactNumber: '', aadhaarNumber: '', address: '',
     checkIn: '', checkOut: '', paymentType: '', roomCost: '',
   });
 
@@ -66,11 +50,6 @@ export default function EmergencyInvoiceModal({ onClose }) {
   });
 
   const [roomSlots, setRoomSlots] = useState([]);
-
-  // Auto-calc age from DOB
-  useEffect(() => {
-    setFormData((prev) => ({ ...prev, age: calcAge(prev.dob) }));
-  }, [formData.dob]);
 
   // Sync slot count + auto-fill total when counters change
   useEffect(() => {
@@ -126,29 +105,6 @@ export default function EmergencyInvoiceModal({ onClose }) {
               <label className="ei-label">Full Name</label>
               <input className="ei-input" type="text" value={formData.fullName}
                 onChange={(e) => handleChange('fullName', e.target.value)} placeholder="Enter full name" />
-            </div>
-
-            <div className="ei-group">
-              <label className="ei-label">Date of Birth</label>
-              <input className="ei-input" type="text" value={formData.dob}
-                onChange={(e) => handleChange('dob', e.target.value)} placeholder="DD/MM/YYYY" />
-            </div>
-
-            <div className="ei-group">
-              <label className="ei-label">Age</label>
-              <input className="ei-input ei-readonly" type="text"
-                value={formData.age ? `${formData.age} years` : ''} readOnly placeholder="Auto from DOB" />
-            </div>
-
-            <div className="ei-group">
-              <label className="ei-label">Gender</label>
-              <select className="ei-input" value={formData.gender}
-                onChange={(e) => handleChange('gender', e.target.value)}>
-                <option value="">Select gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-              </select>
             </div>
 
             <div className="ei-group">
