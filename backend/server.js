@@ -5,6 +5,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const routes = require('./routes');
+const { warmUpOcr } = require('./services/ocrService');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -37,4 +38,5 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`✅ Lodge Management Server running on port ${PORT}`);
   console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
+  warmUpOcr().catch((err) => console.error('[OCR] Warmup failed:', err.message));
 });

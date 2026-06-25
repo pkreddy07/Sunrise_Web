@@ -3,6 +3,28 @@ const Tesseract = require('tesseract.js');
 const Jimp = require('jimp');
 const jsQR = require('jsqr');
 
+// Single persistent worker — created once, reused for every request.
+// Tesseract.recognize() cold-starts a new worker each call (~8-12s language load).
+// A reused worker skips that cost entirely (~1-2s per image).
+let _worker = null;
+
+async function getOcrWorker() {
+  if (!_worker) {
+    // OEM 1 = LSTM_ONLY (fastest + most accurate for printed text)
+    // PSM 6 = single uniform block of text (Aadhaar front layout)
+    _worker = await Tesseract.createWorker('eng', 1, { logger: () => {} });
+    await _worker.setParameters({ tessedit_pageseg_mode: '6' });
+  }
+  return _worker;
+}
+
+// Call at server startup so the first real request isn't slow.
+async function warmUpOcr() {
+  console.log('[OCR] Initializing Tesseract worker...');
+  await getOcrWorker();
+  console.log('[OCR] Tesseract worker ready.');
+}
+
 // Safety-net preprocessing for file uploads (camera images are pre-processed by the frontend).
 // No upscale here — camera images arrive already 2.5× upscaled; uploads are high-res phone photos.
 async function preprocessForOcr(base64Image) {
@@ -13,13 +35,11 @@ async function preprocessForOcr(base64Image) {
 }
 
 async function extractTextFromImage(base64Image) {
-  const processedBuf = await preprocessForOcr(base64Image);
-
-  // Use 'eng' only — adding 'tel' caused Telugu character misreads on English text
-  const { data: { text } } = await Tesseract.recognize(processedBuf, 'eng', {
-    logger: () => {},
-  });
-
+  const [processedBuf, worker] = await Promise.all([
+    preprocessForOcr(base64Image),
+    getOcrWorker(),
+  ]);
+  const { data: { text } } = await worker.recognize(processedBuf);
   return text;
 }
 
@@ -222,6 +242,7 @@ function parseAadhaarQR(qrData) {
 }
 
 module.exports = {
+  warmUpOcr,
   extractTextFromImage,
   extractFromQR,
   parseFrontAadhaar,
