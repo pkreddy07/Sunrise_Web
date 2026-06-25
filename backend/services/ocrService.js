@@ -3,10 +3,20 @@ const Tesseract = require('tesseract.js');
 const Jimp = require('jimp');
 const jsQR = require('jsqr');
 
-async function extractTextFromImage(base64Image) {
-  const imageBuffer = Buffer.from(base64Image, 'base64');
+// Safety-net preprocessing for file uploads (camera images are pre-processed by the frontend).
+// No upscale here — camera images arrive already 2.5× upscaled; uploads are high-res phone photos.
+async function preprocessForOcr(base64Image) {
+  const buf = Buffer.from(base64Image, 'base64');
+  const img = await Jimp.read(buf);
+  img.grayscale().normalize().contrast(0.3);
+  return img.getBufferAsync(Jimp.MIME_PNG);
+}
 
-  const { data: { text } } = await Tesseract.recognize(imageBuffer, 'eng+tel', {
+async function extractTextFromImage(base64Image) {
+  const processedBuf = await preprocessForOcr(base64Image);
+
+  // Use 'eng' only — adding 'tel' caused Telugu character misreads on English text
+  const { data: { text } } = await Tesseract.recognize(processedBuf, 'eng', {
     logger: () => {},
   });
 
@@ -67,9 +77,15 @@ function parseFrontAadhaar(text) {
       continue;
     }
 
-    // Must be purely ASCII letters, spaces, and periods; require at least 2 words
-    if (/^[A-Za-z][A-Za-z\s.]+$/.test(line) && line.trim().split(/\s+/).length >= 2) {
-      result.fullName = line.trim();
+    // Letters, spaces, periods, hyphens, apostrophes (common OCR noise on names)
+    // Strip leading/trailing punctuation that OCR sometimes prepends
+    const cleaned = line.trim().replace(/^[^A-Za-z]+/, '').replace(/[^A-Za-z]+$/, '');
+    if (
+      /^[A-Za-z][A-Za-z\s.'\-]+$/.test(cleaned) &&
+      cleaned.split(/\s+/).length >= 2 &&
+      cleaned.length >= 4
+    ) {
+      result.fullName = cleaned;
       break;
     }
   }

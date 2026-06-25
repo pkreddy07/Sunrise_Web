@@ -1,6 +1,67 @@
 // frontend/src/components/booking/ImageCapture.jsx
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useRef, useState } from 'react';
 import './ImageCapture.css';
+
+// Hybrid preprocessing: upscale 2.5×, greyscale+normalize, Laplacian sharpen, binarize.
+// Applied to camera captures (GPU-accelerated Canvas); file uploads go through backend Jimp.
+function preprocessCanvas(src) {
+  const SCALE = 2.5;
+  const out = document.createElement('canvas');
+  out.width  = Math.round(src.width  * SCALE);
+  out.height = Math.round(src.height * SCALE);
+  const ctx = out.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(src, 0, 0, out.width, out.height);
+
+  const W = out.width, H = out.height;
+  const imgData = ctx.getImageData(0, 0, W, H);
+  const d = imgData.data;
+
+  // Greyscale (perceptual weights) + gather min/max for normalization
+  const grays = new Float32Array(W * H);
+  let minV = 255, maxV = 0;
+  for (let i = 0, j = 0; i < d.length; i += 4, j++) {
+    const g = 0.34 * d[i] + 0.50 * d[i + 1] + 0.16 * d[i + 2];
+    grays[j] = g;
+    if (g < minV) minV = g;
+    if (g > maxV) maxV = g;
+  }
+
+  // Normalize to full 0-255 range — makes 128 threshold lighting-adaptive
+  const range = (maxV - minV) || 1;
+  for (let j = 0; j < grays.length; j++) {
+    grays[j] = ((grays[j] - minV) / range) * 255;
+  }
+
+  // Laplacian sharpen BEFORE binarize so edges are crisp, not smeared
+  const sharp = new Float32Array(grays.length);
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const idx = y * W + x;
+      if (x === 0 || x === W - 1 || y === 0 || y === H - 1) {
+        sharp[idx] = grays[idx];
+        continue;
+      }
+      const val = 5 * grays[idx]
+        - grays[(y - 1) * W + x]
+        - grays[(y + 1) * W + x]
+        - grays[y * W + (x - 1)]
+        - grays[y * W + (x + 1)];
+      sharp[idx] = Math.max(0, Math.min(255, val));
+    }
+  }
+
+  // Binarize at 128 — text → pure black, background → pure white
+  for (let i = 0, j = 0; i < d.length; i += 4, j++) {
+    const v = sharp[j] >= 128 ? 255 : 0;
+    d[i] = d[i + 1] = d[i + 2] = v;
+    d[i + 3] = 255;
+  }
+  ctx.putImageData(imgData, 0, 0);
+
+  return out.toDataURL('image/png'); // lossless — no JPEG artefacts on binarized edges
+}
 
 export default function ImageCapture({ label, onCapture, preview, loading }) {
   const fileInputRef = useRef(null);
@@ -77,7 +138,7 @@ export default function ImageCapture({ label, onCapture, preview, loading }) {
       canvas.getContext('2d').drawImage(video, 0, 0);
     }
 
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    const dataUrl = preprocessCanvas(canvas);
     closeCamera();
     onCapture(dataUrl);
   }
